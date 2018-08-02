@@ -52,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS')
 //remove the notice
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
+require("Config/FD_Define.php");
 require("DB/FD_DB.php");
 require("DB/FD_Mysql.php");
 require("Tools/FD_Crypt.php");
@@ -211,8 +212,8 @@ try
         {
             $debug = $_POST["debug"];
         }
-    } 
-    else if($gest == 2) 
+    }
+    else if($gest == 2)
     {
         $data = file_get_contents("php://input");
         $objData = json_decode($data);
@@ -248,8 +249,8 @@ try
         {
             $debug = $objData->debug;
         }
-    } 
-    else if($gest == 3) 
+    }
+    else if($gest == 3)
     {
         if(isset($_GET["process"]))
         {
@@ -333,12 +334,12 @@ try
     $query = '';
 
     //Gestione invio mail
-    if(isset($mail)) 
+    if(isset($mail))
     {
         $debug_result .= ',"mail" : "'.(string)$mail.'"';
 
         $mailer = new FD_Mailer();
-        if ($mail->gestione == 1) 
+        if ($mail->gestione == 1)
         {
             $mailer->SendMail("volontapp",$mail);
             return;
@@ -393,7 +394,7 @@ try
         $validity = $http->Post("https://admin.costofacile.it/BackEnd/FD_CheckValidityService.php", $post_data);
 
         $log->lwrite('[INFO] - VALIDITY - '.$validity);
-        
+
         // da gestire e da capire la risposta nulla come mai
         if(strlen($validity) == 0)
         {
@@ -456,7 +457,7 @@ try
         }
 
         //Eseguo la query
-        if($type == 1)
+        if($type == EXECUTE_TYPE::QUERY)
         {
             $result = $sql->exportJSON($query);
         }
@@ -562,7 +563,7 @@ try
             if(isset($report) && $report != "" && $report != null)
             {
                 $log->lwrite('[INFO] - report - '.$report.' - '.$result);
-                $pdf = new FD_ReportService("Reports/".$report, 
+                $pdf = new FD_ReportService("Reports/".$report,
                                             count(json_decode($result,true)) == 1 ? json_decode($result,true)[0] : json_decode($result,true)
                                             ,$log);
                 echo $pdf->createPDF();
