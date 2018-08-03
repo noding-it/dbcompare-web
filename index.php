@@ -28,17 +28,18 @@
     <link href="css/style.css" rel="stylesheet">
     <!-- color CSS -->
     <link href="css/colors/default.css" id="theme" rel="stylesheet">
+
+    <style>
+        .modal-dialog {
+            width: 100% !important;
+        }
+        .bg-warning {
+            background-color: #FDE3A7 !important;
+        }
+    </style>
 </head>
 
 <body class="fix-header">
-    <!-- ============================================================== -->
-    <!-- Preloader -->
-    <!-- ============================================================== -->
-    <div class="preloader">
-        <svg class="circular" viewBox="25 25 50 50">
-            <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" />
-        </svg>
-    </div>
     <!-- ============================================================== -->
     <!-- Wrapper -->
     <!-- ============================================================== -->
@@ -54,18 +55,8 @@
                 </div>
                 <ul class="nav" id="side-menu">
                     <li style="padding: 70px 0 0;">
-                        <a href="dashboard.php" class="waves-effect"><i class="fa fa-clock-o fa-fw" aria-hidden="true"></i>Dashboard</a>
+                        <a href="../dashboard.php" class="waves-effect"><i class="fa fa-clock-o fa-fw" aria-hidden="true"></i>Dashboard</a>
                     </li>
-                    <li>
-                        <a href="javascript.void(0)" class="waves-effect" data-toggle="modal" data-target="#passwordModal"><i class="fa fa-key fa-fw" aria-hidden="true"></i>Cambio Password Demo</a>
-                    </li>
-                    <li style="background-color: #7ace4c;color: white">
-                        <a class="waves-effect" onclick="refreshData()" ><i class="fa fa-recycle fa-fw" aria-hidden="true"></i>Aggiorna Dati</a>
-                    </li>
-                    <li>
-                        <a href="index.html" class="waves-effect"><i class="fa fa-info-circle fa-fw" aria-hidden="true"></i>Ultimo aggiornamento: <? echo date ("d m Y - H:i:s.", filemtime("Import/LogError.json")) ?></a>
-                    </li>
-
                 </ul>
             </div>
             
@@ -78,38 +69,20 @@
         <!-- ============================================================== -->
         <div id="page-wrapper">
             <div class="container-fluid">
-                <div class="row bg-title">
-                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
-                        <h4 class="page-title">DB Compare</h4> </div>
-                    <!--<div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
-                        <a href="https://wrappixel.com/templates/ampleadmin/" target="_blank" class="btn btn-danger pull-right m-l-20 hidden-xs hidden-sm waves-effect waves-light">Upgrade to Pro</a>
-                        <ol class="breadcrumb">
-                            <li><a href="#">Dashboard</a></li>
-                        </ol>
-                    </div>-->
-                    <!-- /.col-lg-12 -->
-                </div>
                 <!-- ============================================================== -->
                 <!-- table -->
                 <!-- ============================================================== -->
                 <div class="row">
                     <div class="col-md-12 col-lg-12 col-sm-12">
                         <div class="white-box">
-                            <!--<div class="col-md-3 col-sm-4 col-xs-6 pull-right">
-                                <select class="form-control pull-right row b-none">
-                                    <option>March 2017</option>
-                                    <option>April 2017</option>
-                                    <option>May 2017</option>
-                                    <option>June 2017</option>
-                                    <option>July 2017</option>
-                                </select>
-                            </div>-->
+
                             <h3 class="box-title">Comparazione DB</h3>
 
-                            <div class="row">
-                                <div class="col-xs-33"><select id="master"></select></div>
-                                <div class="col-xs-33"><select id="slave"></select></div>
-                                <div class="col-xs-33"><button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="get_data_compare()">Compara</button></div>
+                            <div class="row" style="width: 100%">
+                                <div class="col-xs-4"><select class="form-control" id="master"></select></div>
+                                <div class="col-xs-4"><select class="form-control" id="slave"></select></div>
+                                <div class="col-xs-2"><button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="get_data_compare()">Compara</button></div>
+                                <div class="col-xs-2"><span id="Tot"></span></div>
                             </div>
 
                             <div id="tab_compare" class="table-responsive"></div>
@@ -171,28 +144,30 @@
     </div>                                    
     <!-- FINE Modal servizi clienti -->
     <!-- Modal cambio password -->
-    <div class="modal fade" id="passwordModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="sql_detail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Inserisci la nuova password per la versione DEMO</h5>
+                    <h2 class="modal-title" id="exampleModalLabel"></h2>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label for="exampleInputPassword1">Nuova Password</label>
-                        <input type="password" class="form-control" id="nuova_password" placeholder="Password">
+
+                    <div class="row">
+                        <div class='col-sm-6'><h2><span id="master_title"></span></h2></div>
+                        <div class='col-sm-6'><h2><span id="slave_title"></span></h2></div>
+
+                        <div class='col-sm-6'><pre><span id="master_detail"></span></pre></div>
+                        <div class='col-sm-6'><pre><span id="slave_detail"></span></pre></div>
                     </div>
-                    <div class="form-group">
-                        <label for="exampleInputPassword1">Conferma Password</label>
-                        <input type="password" class="form-control" id="conferma_password" placeholder="Password">
-                    </div>
+
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
-                    <button type="button" class="btn btn-success" onclick="reset_password_demo()">Cambia Passowrd</button>
+                <div class="modal-footer" style="text-align: center;">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+                    <button type="button" class="btn btn-success" >Aggiona DB Slave</button>
+                    <button type="button" class="btn btn-danger" >Aggiona DB Master</button>
                 </div>
             </div>
         </div>
