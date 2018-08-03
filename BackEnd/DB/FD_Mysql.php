@@ -8,22 +8,14 @@ final class FD_Mysql extends FD_DB
 	 * *******************/
 
     //Costruttore
-    function __construct()
+    function __construct($id_config)
     {
-        $ini_array = parse_ini_file("Config/config.inc.ini");
-        $this->key = strtolower(md5_file("Config/esatto.mp3"));
-
-        $this->hostname = str_replace(" ","",trim($this->decrypt(str_replace("@","=",$ini_array["hostname"]),$this->key)));
-        $this->username = str_replace(" ","",trim($this->decrypt(str_replace("@","=",$ini_array["username"]),$this->key)));
-        if(strlen($ini_array["password"]) > 0)
-        {
-            $this->password = str_replace(" ","",trim($this->decrypt(str_replace("@","=",$ini_array["password"]),$this->key)));
-        }
-        else
-        {
-            $this->password = "";
-        }
-        $this->database = str_replace(" ","",trim($this->decrypt(str_replace("@","=",$ini_array["database"]),$this->key)));
+        $connection_array = json_decode(file_get_contents("Config/config.json"),true);
+        //$this->key = strtolower(md5_file("Config/esatto.mp3"));
+        $this->hostname = $connection_array[array_search($id_config,array_column($connection_array,"id"))]["host"];
+        $this->username = $connection_array[array_search($id_config,array_column($connection_array,"id"))]["user"];
+        $this->password = $connection_array[array_search($id_config,array_column($connection_array,"id"))]["pass"];
+        $this->database = $connection_array[array_search($id_config,array_column($connection_array,"id"))]["db"];
         $this->Connect();
     }
 
@@ -243,7 +235,6 @@ final class FD_Mysql extends FD_DB
         {
             $rows = $this->arrayedResult;
         }
-
         return json_encode($rows, JSON_NUMERIC_CHECK);
     }
 

@@ -1,7 +1,0 @@
-{
-  "name": "db_compare",
-  "integrations": {
-    "cordova": {}
-  },
-  "type": "ionic-angular"
-}
