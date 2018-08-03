@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="icon" type="image/png" sizes="16x16" href="plugins/images/favicon.ico">
-    <title>Admin - Costo Facile</title>
+    <title>Admin - Costo Facile - Sql Compare</title>
     <!-- Bootstrap Core CSS -->
     <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Menu CSS -->
@@ -28,79 +28,6 @@
     <link href="css/style.css" rel="stylesheet">
     <!-- color CSS -->
     <link href="css/colors/default.css" id="theme" rel="stylesheet">
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-<![endif]-->
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <!-- column chart -->
-    <script type="text/javascript">
-        google.charts.load('current', {'packages':['bar']});
-        google.charts.setOnLoadCallback(drawChart);
-
-        function drawChart() {
-            var data = google.visualization.arrayToDataTable([
-                ['Cliente', 'Clienti', 'Articoli', 'Preventivi'],
-                <? echo file_get_contents("Import/GraficoClienti.json"); ?>
-            ]);
-
-            var options = {
-                legend: 'top',
-                chart: {
-                    title: '',
-                    subtitle: 'Clienti, Articoli e Preventivi'
-                }
-            };
-
-            var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
-
-            chart.draw(data, google.charts.Bar.convertOptions(options));
-        }
-    </script>
-    <!-- pie chart platform -->
-    <script type="text/javascript">
-        google.charts.load('current', {'packages':['corechart']});
-        google.charts.setOnLoadCallback(drawChart);
-
-        function drawChart() {
-
-            var data = google.visualization.arrayToDataTable([
-                ['Sistema Operativo', 'Sessioni'],
-                <? echo file_get_contents("Import/Platform.json"); ?>
-            ]);
-
-            var options = {
-                legend: 'top',
-                title: '',
-                is3D: true
-            };
-            var chart = new google.visualization.PieChart(document.getElementById('platform'));
-            chart.draw(data, options);
-        }
-    </script>
-    <!-- pie chart browser -->
-    <script type="text/javascript">
-        google.charts.load('current', {'packages':['corechart']});
-        google.charts.setOnLoadCallback(drawChart);
-
-        function drawChart() {
-
-            var data = google.visualization.arrayToDataTable([
-                ['Browser', 'Sessioni'],
-                <? echo file_get_contents("Import/Browser.json"); ?>
-            ]);
-
-            var options = {
-                legend: 'top',
-                title: '',
-                is3D: true
-            };
-            var chart = new google.visualization.PieChart(document.getElementById('browser'));
-            chart.draw(data, options);
-        }
-    </script>
 </head>
 
 <body class="fix-header">
@@ -116,31 +43,6 @@
     <!-- Wrapper -->
     <!-- ============================================================== -->
     <div id="wrapper">
-        <!-- ============================================================== -->
-        <!-- Topbar header - style you can find in pages.scss -->
-        <!-- ============================================================== -->
-        <nav class="navbar navbar-default navbar-static-top m-b-0">
-            <div class="navbar-header">
-                <div class="top-left-part" style="padding-bottom: 10px;" >
-                    <!-- Logo -->
-                    <a class="logo" href="dashboard.php">
-                        <img src="plugins/images/logo-text.png" alt="home" style="width: 90%" class="light-logo" />
-                        <!--<span class="hidden-xs"><img src="plugins/images/logo-icon.png" alt="home" class="light-logo" /></span>-->
-                        <!--<img src="plugins/images/admin-logo.png" alt="home" class="dark-logo" /><img src="plugins/images/admin-logo-dark.png" alt="home" class="light-logo" />
-                        <span class="hidden-xs"><img src="plugins/images/admin-text.png" alt="home" class="dark-logo" /><img src="plugins/images/admin-text-dark.png" alt="home" class="light-logo" /></span>-->
-                    </a>
-                </div>
-                <!-- /Logo -->
-                <ul class="nav navbar-top-links navbar-right pull-right">
-                    <li>
-                        <a class="profile-pic" href="#"><b class="hidden-xs">Admin</b></a>
-                    </li>
-                </ul>
-            </div>
-            <!-- /.navbar-header -->
-            <!-- /.navbar-top-links -->
-            <!-- /.navbar-static-side -->
-        </nav>
         <!-- End Top Navigation -->
         <!-- ============================================================== -->
         <!-- Left Sidebar - style you can find in sidebar.scss  -->
@@ -163,18 +65,6 @@
                     <li>
                         <a href="index.html" class="waves-effect"><i class="fa fa-info-circle fa-fw" aria-hidden="true"></i>Ultimo aggiornamento: <? echo date ("d m Y - H:i:s.", filemtime("Import/LogError.json")) ?></a>
                     </li>
-                    <!--<li>
-                        <a href="fontawesome.html" class="waves-effect"><i class="fa fa-font fa-fw" aria-hidden="true"></i>Icons</a>
-                    </li>
-                    <li>
-                        <a href="map-google.html" class="waves-effect"><i class="fa fa-globe fa-fw" aria-hidden="true"></i>Google Map</a>
-                    </li>
-                    <li>
-                        <a href="blank.html" class="waves-effect"><i class="fa fa-columns fa-fw" aria-hidden="true"></i>Blank Page</a>
-                    </li>
-                    <li>
-                        <a href="404.html" class="waves-effect"><i class="fa fa-info-circle fa-fw" aria-hidden="true"></i>Error 404</a>
-                    </li>-->
 
                 </ul>
             </div>
@@ -190,7 +80,7 @@
             <div class="container-fluid">
                 <div class="row bg-title">
                     <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
-                        <h4 class="page-title">Dashboard</h4> </div>
+                        <h4 class="page-title">DB Compare</h4> </div>
                     <!--<div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
                         <a href="https://wrappixel.com/templates/ampleadmin/" target="_blank" class="btn btn-danger pull-right m-l-20 hidden-xs hidden-sm waves-effect waves-light">Upgrade to Pro</a>
                         <ol class="breadcrumb">
@@ -198,69 +88,6 @@
                         </ol>
                     </div>-->
                     <!-- /.col-lg-12 -->
-                </div>
-                <!-- /.row -->
-                <!-- ============================================================== -->
-                <!-- Different data widgets -->
-                <!-- ============================================================== -->
-                <!-- .row -->
-                <?
-                    //ciclo i clienti per prendermi i dati
-                    $totali_json = file_get_contents("Import/Totali.json");
-                    $totali = json_decode($totali_json, true);
-                ?>
-                <div class="row">
-                    <div class="col-lg-4 col-sm-6 col-xs-12">
-                        <div class="white-box analytics-info">
-                            <h3 class="box-title">Totale Clienti</h3>
-                            <ul class="list-inline two-part">
-                                <li>
-                                    <div id="sparklinedash"></div>
-                                </li>
-                                <li class="text-right"><i class="ti-arrow-up text-success"></i> <span class="counter text-success"><? echo $totali[0]["clienti"] ?></span></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-sm-6 col-xs-12">
-                        <div class="white-box analytics-info">
-                            <h3 class="box-title">Totale Articoli</h3>
-                            <ul class="list-inline two-part">
-                                <li>
-                                    <div id="sparklinedash2"></div>
-                                </li>
-                                <li class="text-right"><i class="ti-arrow-up text-purple"></i> <span class="counter text-purple"><? echo $totali[0]["articoli"] ?></span></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-sm-6 col-xs-12">
-                        <div class="white-box analytics-info">
-                            <h3 class="box-title">Totale Preventivi</h3>
-                            <ul class="list-inline two-part">
-                                <li>
-                                    <div id="sparklinedash3"></div>
-                                </li>
-                                <li class="text-right"><i class="ti-arrow-up text-info"></i> <span class="counter text-info"><? echo $totali[0]["preventivi"] ?></span></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <!--/.row -->
-                <!--row -->
-                <!-- /.row -->
-                <div class="row">
-                    <div class="col-md-12 col-lg-12 col-sm-12 col-xs-12">
-                        <div class="white-box">
-                            <h3 class="box-title">Analisi X Cliente</h3>
-                            <!--<ul class="list-inline text-right">
-                                <li>
-                                    <h5><i class="fa fa-circle m-r-5 text-info"></i>Mac</h5> </li>
-                                <li>
-                                    <h5><i class="fa fa-circle m-r-5 text-inverse"></i>Windows</h5> </li>
-                            </ul>
-                            <div id="ct-visits" style="height: 405px;"></div>-->
-                            <div id="columnchart_material" style="width: 100%; height: 400px;"></div>
-                        </div>
-                    </div>
                 </div>
                 <!-- ============================================================== -->
                 <!-- table -->
@@ -277,52 +104,22 @@
                                     <option>July 2017</option>
                                 </select>
                             </div>-->
-                            <h3 class="box-title">Stato Clienti</h3>
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>NOME</th>
-                                            <th>DATA INIZIO</th>
-                                            <th>DATE FINE</th>
-                                            <th>RATA MENSILE</th>
-                                            <th>PAGATO</th>
-                                            <th>AZIONI</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    <?
-                                        //ciclo i clienti per prendermi i dati
-                                        $result = file_get_contents("Import/Clienti.json");
-                                        $array_result = json_decode($result, true);
-                                        for($i=0;$i<count($array_result);$i++)
-                                        {
-                                            echo '<tr>
-                                                    <td>'.$array_result[$i]["id"].'</td>
-                                                    <td class="txt-oflo">'.$array_result[$i]["descrizione"].'</td>
-                                                    <td>'.$array_result[$i]["data_inizio"].'</td>
-                                                    <td class="txt-oflo">'.$array_result[$i]["data_fine"].'</td>
-                                                    <td class="txt-oflo">€'.$array_result[$i]["rata_mensile"].'</td>
-                                                    <td><span class="text-success">€'.$array_result[$i]["pagato"].'</span></td>
-                                                    <td>
-                                                        <button class="btn btn-sm btn-success mr-1 mb-1" class="waves-effect" data-toggle="modal" data-target="#serviceModal"
-                                                                title="Servizi Attivi" onclick="checkServiziCliente('.$array_result[$i]["id"].',\''.$array_result[$i]["descrizione"].'\',\''.$array_result[$i]["data_inizio_orig"].'\',\''.$array_result[$i]["data_fine_orig"].'\')">
-                                                            <i class="fa fa-gear"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>';
-                                        }
-                                     ?>
-                                    </tbody>
-                                </table>
+                            <h3 class="box-title">Comparazione DB</h3>
+
+                            <div class="row">
+                                <div class="col-xs-33"><select id="master"></select></div>
+                                <div class="col-xs-33"><select id="slave"></select></div>
+                                <div class="col-xs-33"><button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="get_data_compare()">Compara</button></div>
                             </div>
+
+                            <div id="tab_compare" class="table-responsive"></div>
+
                         </div>
                     </div>
                 </div>
             </div>
             <!-- /.container-fluid -->
-            <footer class="footer text-center"> 2018 &copy; db_compare </footer>
+            <footer class="footer text-center"> 2018 &copy; sql_compare </footer>
         </div>
         <!-- ============================================================== -->
         <!-- End Page Content -->
@@ -432,7 +229,7 @@
     <script src="plugins/bower_components/jquery-sparkline/jquery.sparkline.min.js"></script>
     <!-- Custom Theme JavaScript -->
     <script src="js/custom.min.js"></script>
-    <script src="js/dashboard1.js"></script>
+    <script src="js/core.js"></script>
     <script src="plugins/bower_components/toast-master/js/jquery.toast.js"></script>
 </body>
 
