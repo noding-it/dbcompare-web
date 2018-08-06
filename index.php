@@ -122,8 +122,8 @@
                 </div>
                 <div class="modal-footer" style="text-align: center;">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
-                    <button type="button" class="btn btn-success" onclick="update_db_slave()" >Aggiona DB Slave</button>
-                    <button type="button" class="btn btn-danger" onclick="update_db_master()" >Aggiona DB Master</button>
+                    <button type="button" class="btn btn-success" onclick="update_db_slave()" >Aggiona DB Slave >></button>
+                    <button type="button" class="btn btn-danger" onclick="update_db_master()" >&lt;&lt; Aggiona DB Master</button>
                 </div>
             </div>
         </div>

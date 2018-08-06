@@ -77,11 +77,16 @@ function update_db_slave()
                 $.get("FD_UpdateEntity.php?id_to=" + $('#slave').val() + "&query=" + encodeURIComponent(query),
                     function(responce)
                     {
-                        if(responce.indexOf("error")>-1) alert(JSON.parse(responce).error);
-                        else 
-                        {
-                            $('#sql_detail').modal('hide');
-                            get_data_compare();
+                        try {
+                            if(responce.indexOf("error")>-1) alert(JSON.parse(responce).error);
+                            else 
+                            {
+                                $('#sql_detail').modal('hide');
+                                get_data_compare();
+                            }
+                        }
+                        catch(err) {
+                            alert(err.message);
                         }
                     }
                 ).fail(function() {
