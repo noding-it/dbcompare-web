@@ -99,50 +99,6 @@
         <!-- ============================================================== -->
     </div>
 
-    <!-- Modal servizi clienti -->
-    <div class="modal fade" id="serviceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="serviceModalTitle"></h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" >
-                    
-                    <div class="row">
-                        <div class='col-sm-6'>
-                            <div class="form-group">
-                                <div class='input-group date' id='dtp_inizio' onclick="$('#dtp_inizio').datetimepicker({locale: 'it'});">
-                                    <input type='text' class="form-control" id="data_inizio" />
-                                    <span class="input-group-addon">
-                                        <span class="glyphicon glyphicon-calendar"></span>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class='col-sm-6'>
-                            <div class="form-group">
-                                <div class='input-group date' id='dtp_fine' onclick="$('#dtp_fine').datetimepicker({locale: 'it'});">
-                                    <input type='text' class="form-control" id="data_fine" />
-                                    <span class="input-group-addon">
-                                        <span class="glyphicon glyphicon-calendar"></span>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="serviceModalTable"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
-                </div>
-            </div>
-        </div>
-    </div>                                    
-    <!-- FINE Modal servizi clienti -->
     <!-- Modal cambio password -->
     <div class="modal fade" id="sql_detail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -166,8 +122,8 @@
                 </div>
                 <div class="modal-footer" style="text-align: center;">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
-                    <button type="button" class="btn btn-success" >Aggiona DB Slave</button>
-                    <button type="button" class="btn btn-danger" >Aggiona DB Master</button>
+                    <button type="button" class="btn btn-success" onclick="update_db_slave()" >Aggiona DB Slave</button>
+                    <button type="button" class="btn btn-danger" onclick="update_db_master()" >Aggiona DB Master</button>
                 </div>
             </div>
         </div>
@@ -186,6 +142,8 @@
     <script src="js/moment-with-locales.min.js"></script>
     <!-- Bootstrap Core JavaScript -->
     <script src="bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- bootbox -->
+    <script src="plugins/bower_components/bootbox.min.js"></script>
     <!-- Menu Plugin JavaScript -->
     <script src="plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js"></script>
     <!--slimscroll JavaScript -->

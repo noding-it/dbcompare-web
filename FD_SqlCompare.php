@@ -38,6 +38,7 @@ $log = new FD_Logger(null);
 $id_master = $_GET["id_master"];
 $id_slave = $_GET["id_slave"];
 
+
 $master_db = json_decode(file_get_contents("Config/config.json"),true)[array_search($id_master,array_column(json_decode(file_get_contents("Config/config.json"),true),"id"))]["db"];
 $slave_db = json_decode(file_get_contents("Config/config.json"),true)[array_search($id_slave,array_column(json_decode(file_get_contents("Config/config.json"),true),"id"))]["db"];
 
@@ -47,6 +48,24 @@ if(strlen($id_master) == 0 || strlen($id_slave) == 0)
     echo '{"error": "Parametri non validi !"}';
     return;
 }
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ FUNZIONI @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+function remove_auto_increment_definer($string)
+{
+    if(strpos($string,"AUTO_INCREMENT") !== false)
+    {
+        $path_to_replace = substr(strstr( $string, 'AUTO_INCREMENT=' ),0,stripos(strstr( $string, 'AUTO_INCREMENT=' )," "));
+        return str_replace("DEFINER=``@`%`","",str_replace($path_to_replace,"",$string));
+    }
+    else
+    {
+        return str_replace("DEFINER=``@`%`","",$string);
+    }
+}
+
+
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 try
 {
@@ -112,6 +131,7 @@ try
 
       array_push($final_result,
         array(
+          "type" => (array_keys(json_decode($entity_definition,true)[0])[0] == "Table" ? "table" : "view"),
           "master" => $master_db,
           "entity_master" => $master_result_array[$i][$key],
           "entity_definition_master" => str_replace($master_db,"",(array_keys(json_decode($entity_definition,true)[0])[0] == "Table" ? json_decode($entity_definition,true)[0]["Create Table"] : json_decode($entity_definition,true)[0]["Create View"])),
@@ -157,6 +177,7 @@ try
 
       array_push($final_result,
         array(
+          "type" => "procedure",
           "master" => $master_db,
           "entity_master" => $master_result_array[$i]["Name"],
           "entity_definition_master" => str_replace($master_db,"",json_decode($entity_definition,true)[0]["Create Procedure"]),
@@ -231,12 +252,13 @@ try
       {
         array_push($final_result,
           array(
+            "type" => (array_keys(json_decode($entity_definition,true)[0])[0] == "Table" ? "table" : "view"),
             "master" => $master_db,
             "entity_master" => null,
             "entity_definition_master" => null,
             "slave" => $slave_db,
             "entity_slave" => $slave_result_array[$i][$key],
-            "entity_definition_slave" => (array_keys(json_decode($entity_definition,true)[0])[0] == "Table" ? json_decode($entity_definition,true)[0]["Create Table"] : json_decode($entity_definition,true)[0]["Create View"]),
+            "entity_definition_slave" => str_replace($slave_db,"",(array_keys(json_decode($entity_definition,true)[0])[0] == "Table" ? json_decode($entity_definition,true)[0]["Create Table"] : json_decode($entity_definition,true)[0]["Create View"])),
             "is_different" => true
           )
         );
@@ -287,12 +309,13 @@ try
       {
         array_push($final_result,
           array(
+            "type" => "procedure",
             "master" => $master_db,
             "entity_master" => null,
             "entity_definition_master" => null,
             "slave" => $slave_db,
             "entity_slave" => $slave_result_array[$i]["Name"],
-            "entity_definition_slave" => json_decode($entity_definition,true)[0]["Create Procedure"],
+            "entity_definition_slave" => str_replace($slave_db,"",json_decode($entity_definition,true)[0]["Create Procedure"]),
             "is_different" => true
           )
         );
@@ -306,18 +329,18 @@ try
 
     // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ESTRAZIONE FINALE @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-    echo json_encode($final_result);
-
-    //var_dump($final_result);
-    /*
-    for($j=0;$j<count($final_result);$j++)
+    //normalizzo definizioni - AUTO_INCREMENT=5
+    for($i=0;$i<count($final_result);$i++)
     {
-      echo $final_result[$j]["entity_master"]." || ".$final_result[$j]["entity_slave"]."||".$final_result[$j]["is_different"]."<br/>";
+        $final_result[$i]["entity_definition_master"] = remove_auto_increment_definer($final_result[$i]["entity_definition_master"]);
+        $final_result[$i]["entity_definition_slave"] = remove_auto_increment_definer($final_result[$i]["entity_definition_slave"]);
+        $final_result[$i]["is_different"] = ($final_result[$i]["entity_definition_slave"] != $final_result[$i]["entity_definition_master"] ? true : false);
     }
-    */
 
+    echo json_encode($final_result);
 }
 catch (Exception $e)
 {
+    echo '{"error" : "'.$e->getMessage().'"}';
     $log->lwrite('[ERRORE] - '.$e->getMessage());
 }
