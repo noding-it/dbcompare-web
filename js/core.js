@@ -61,16 +61,31 @@ function update_db_slave()
             if(result)
             {
                 var query="";
+
+                //TIPO AZIONE
                 switch (entity_selected.master_to_slave_action)
                 {
                     case "create":
                         query = entity_selected.entity_definition_master;
                         break;
                     case "alter":
-                        query = entity_selected.entity_definition_master.toLowerCase().replace("create ","alter ");
+                        query = (entity_selected.type == "procedure" ? entity_selected.entity_definition_master : entity_selected.entity_definition_master.replace("CREATE ","ALTER "));
                         break;
                     case "drop":
                         query = "drop " + entity_selected.type + " " + entity_selected.nome + ";";
+                        break;
+                }
+
+                //TIPO ENTITA'
+                switch (entity_selected.type)
+                {
+                    case "table":
+                    case "view":
+                        query = query;
+                        break;
+                    case "procedure":
+                    case "function":
+                        query = "drop " + entity_selected.type + " " + entity_selected.nome + "; " + query.replace("NO SQL"," NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER ");
                         break;
                 }
 
@@ -112,26 +127,26 @@ function get_data_compare()
             var table = "";
             responce = JSON.parse(responce);
             table = "<table class=\"table table-hover\">\n" +
-                "     <thead>\n" +
-                "       <tr>\n" +
-                "         <th scope=\"col\">Nome Master</th>\n" +
-                "         <th scope=\"col\">Nome Slave</th>\n" +
-                "         <th scope=\"col\">Differenze</th>\n" +
-                "         <th align=\"center\" scope=\"col\">Dettaglio</th>\n" +
-                "       </tr>\n" +
-                "     </thead>\n" +
-                "     <tbody>";
+                    "     <thead>\n" +
+                    "       <tr>\n" +
+                    "         <th scope=\"col\">Nome Master</th>\n" +
+                    "         <th scope=\"col\">Nome Slave</th>\n" +
+                    "         <th scope=\"col\">Differenze</th>\n" +
+                    "         <th align=\"center\" scope=\"col\">Dettaglio</th>\n" +
+                    "       </tr>\n" +
+                    "     </thead>\n" +
+                    "     <tbody>";
 
             for(var i=0;i<responce.length;i++)
             {
                 table += "<tr "+ (responce[i]["is_different"] == true ? 'class=\"bg-warning\"' : '') +" >\n" +
-                    "  <td>"+responce[i]["entity_master"]+"</td>\n" +
-                    "  <td>"+responce[i]["entity_slave"]+"</td>\n" +
-                    "  <td align='center'><input type=\"checkbox\" "+(responce[i]["is_different"] == true ? 'checked' : '' )+" disabled='true'></td>\n" +
-                    "  <td align='center'> \n" +
-                            "<button type=\"button\" class=\"waves-effect\" data-toggle=\"modal\" data-target=\"#sql_detail\" class=\"btn btn-secondary\" onclick=\"sql_details('"+responce[i]["entity_master"]+"','"+responce[i]["entity_slave"]+"','"+responce[i]["type"]+"')\" >\n" +
-                            "<i class=\"glyphicon glyphicon-search\" aria-hidden=\"true\"></i></button></td>\n" +
-                    " </tr>";
+                        "  <td>"+responce[i]["entity_master"]+"</td>\n" +
+                        "  <td>"+responce[i]["entity_slave"]+"</td>\n" +
+                        "  <td align='center'><input type=\"checkbox\" "+(responce[i]["is_different"] == true ? 'checked' : '' )+" disabled='true'></td>\n" +
+                        "  <td align='center'> \n" +
+                                "<button type=\"button\" class=\"waves-effect\" data-toggle=\"modal\" data-target=\"#sql_detail\" class=\"btn btn-secondary\" onclick=\"sql_details('"+responce[i]["entity_master"]+"','"+responce[i]["entity_slave"]+"','"+responce[i]["type"]+"')\" >\n" +
+                                "<i class=\"glyphicon glyphicon-search\" aria-hidden=\"true\"></i></button></td>\n" +
+                        " </tr>";
             }
 
             table += "</tbody></table>";
