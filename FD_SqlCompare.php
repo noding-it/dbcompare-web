@@ -56,14 +56,13 @@ function remove_auto_increment_definer($string)
     if(strpos($string,"AUTO_INCREMENT") !== false)
     {
         $path_to_replace = substr(strstr( $string, 'AUTO_INCREMENT=' ),0,stripos(strstr( $string, 'AUTO_INCREMENT=' )," "));
-        return str_replace("DEFINER=``@`%`","",str_replace($path_to_replace,"",$string));
+        return str_replace("  "," ",str_replace("DEFINER=``@`%`","",str_replace($path_to_replace,"",$string)));
     }
     else
     {
         return str_replace("DEFINER=``@`%`","",$string);
     }
 }
-
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
