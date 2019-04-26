@@ -146,7 +146,7 @@ try
     $log->lwrite('[INFO] - [MASTER] - query - '.$query);
     $master_result = $sql->exportJSON($query);
 
-    if(strlen($sql->lastError) > 0)
+    if (strlen($sql->lastError) > 0)
     {
         $log->lwrite('[ERRORE] - [MASTER] - '.$sql->lastError) ;
         if($sql->connected)
@@ -158,10 +158,26 @@ try
 
     $master_result_array = json_decode($master_result,true);
 
+    $query = "SHOW FUNCTION STATUS;";
+    $log->lwrite('[INFO] - [MASTER] - query - '.$query);
+    $master_result = $sql->exportJSON($query);
+
+    if (strlen($sql->lastError) > 0)
+    {
+        $log->lwrite('[ERRORE] - [MASTER] - '.$sql->lastError) ;
+        if($sql->connected)
+        {
+            $sql->closeConnection();
+        }
+        return;
+    }
+
+    $master_result_array = array_merge($master_result_array, json_decode($master_result,true));
+
     //Compongo array di confronto
     for($i=0;$i<count($master_result_array);$i++)
     {
-      $query = "SHOW CREATE PROCEDURE ".$master_result_array[$i]["Name"].";";
+      $query = "SHOW CREATE ".$master_result_array[$i]["Type"]." ".$master_result_array[$i]["Name"].";";
       $entity_definition = $sql->exportJSON($query);
 
       if(strlen($sql->lastError) > 0)
@@ -176,10 +192,10 @@ try
 
       array_push($final_result,
         array(
-          "type" => "procedure",
+          "type" => strtolower($master_result_array[$i]["Type"]),
           "master" => $master_db,
           "entity_master" => $master_result_array[$i]["Name"],
-          "entity_definition_master" => str_replace($master_db,"",json_decode($entity_definition,true)[0]["Create Procedure"]),
+          "entity_definition_master" => str_replace($master_db,"",json_decode($entity_definition,true)[0]["Create ".ucfirst(strtolower($master_result_array[$i]["Type"]))]),
           "slave" => $slave_db,
           "entity_slave" => null,
           "entity_definition_slave" => null,
@@ -281,10 +297,26 @@ try
 
     $slave_result_array = json_decode($slave_result,true);
 
+    $query = "SHOW FUNCTION STATUS;";
+    $log->lwrite('[INFO] - [SLAVE] - query - '.$query);
+    $slave_result = $sql->exportJSON($query);
+
+    if (strlen($sql->lastError) > 0)
+    {
+        $log->lwrite('[ERRORE] - [SLAVE] - '.$sql->lastError) ;
+        if($sql->connected)
+        {
+            $sql->closeConnection();
+        }
+        return;
+    }
+
+    $slave_result_array = array_merge($slave_result_array, json_decode($slave_result,true));
+
     //Popolo l'array finale con i dati dello slave
     for($i=0;$i<count($slave_result_array);$i++)
     {
-      $query = "SHOW CREATE PROCEDURE ".$slave_result_array[$i]["Name"].";";
+      $query = "SHOW CREATE ".$slave_result_array[$i]["Type"]." ".$slave_result_array[$i]["Name"].";";
       $entity_definition = $sql->exportJSON($query);
 
       if(strlen($sql->lastError) > 0)
@@ -301,20 +333,20 @@ try
       if(is_numeric($index))
       {
         $final_result[$index]["entity_slave"] = $slave_result_array[$i]["Name"];
-        $final_result[$index]["entity_definition_slave"] = str_replace($slave_db,"",json_decode($entity_definition,true)[0]["Create Procedure"]);
+        $final_result[$index]["entity_definition_slave"] = str_replace($slave_db,"",json_decode($entity_definition,true)[0]["Create ".ucfirst(strtolower($slave_result_array[$i]["Type"]))]);
         $final_result[$index]["is_different"] = ($final_result[$index]["entity_definition_slave"] != $final_result[$index]["entity_definition_master"] ? true : false);
       }
       else
       {
         array_push($final_result,
           array(
-            "type" => "procedure",
+            "type" => strtolower($slave_result_array[$i]["Type"]),
             "master" => $master_db,
             "entity_master" => null,
             "entity_definition_master" => null,
             "slave" => $slave_db,
             "entity_slave" => $slave_result_array[$i]["Name"],
-            "entity_definition_slave" => str_replace($slave_db,"",json_decode($entity_definition,true)[0]["Create Procedure"]),
+            "entity_definition_slave" => str_replace($slave_db,"",json_decode($entity_definition,true)[0]["Create ".ucfirst(strtolower($slave_result_array[$i]["Type"]))]),
             "is_different" => true
           )
         );
