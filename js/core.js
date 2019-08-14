@@ -5,7 +5,6 @@
      "use strict";
 
      $.getJSON( "Config/config.json", function( data ) {
-
         var $select_master = $('#master'); 
         var $select_slave = $('#slave'); 
         $select_master.find('option').remove();  
@@ -15,12 +14,10 @@
             $select_master.append('<option value=' + value.id + '>' + value.db + '</option>');
             $select_slave.append('<option value=' + value.id + '>' + value.db + '</option>');
         });
-
     });
-
  });
 
-function sql_details(nome_master,nome_slave,tipo){
+function sql_details(nome_master,nome_slave,tipo) {
     var nome = (nome_master != "null" ? nome_master : nome_slave);
 
     $("#exampleModalLabel").html("<b>"+nome+"</b>");
@@ -43,83 +40,114 @@ function sql_details(nome_master,nome_slave,tipo){
     }
 }
 
-function update_db_slave()
-{
-    bootbox.confirm({
-        message: "Sicuro di voler aggiornare il DB Slave ?",
-        buttons: {
-            confirm: {
-                label: 'Si',
-                className: 'btn-success'
+function sql_update(nome_master,nome_slave,tipo) {
+
+    const nome = (nome_master != "null" ? nome_master : nome_slave);
+    let query = '';
+    //compongo oggetto per update
+    entity_selected = {
+        nome: nome,
+        type: tipo,
+        entity_definition_master: (nome_master != "null" ? data_compare.find(x => x.entity_master === nome).entity_definition_master : ""),
+        entity_definition_slave: (nome_slave != "null" ? data_compare.find(x => x.entity_slave === nome).entity_definition_slave : ""),
+        //capisco se devo inserire / cancellare / modificare
+        master_to_slave_action: (nome_master == "null" ? "drop" : nome_slave == "null" ? "create" : "alter"),
+        slave_to_master_action: (nome_master == "null" ? "create" : nome_slave == "null" ? "drop" : "alter")
+    };
+
+    if (entity_selected.entity_definition_slave === null || entity_selected.entity_definition_slave === '') { // inserimento diretto
+        query = entity_selected.entity_definition_master;
+        executeQuery(query);
+    } else {
+
+        bootbox.confirm({
+            message: "Sicuro di voler aggiornare il DB Slave ?",
+            buttons: {
+                confirm: {
+                    label: 'Si',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
             },
-            cancel: {
-                label: 'No',
-                className: 'btn-danger'
-            }
-        },
-        callback: function (result) {
-            if(result)
-            {
-                var query="";
-
-                //TIPO AZIONE
-                switch (entity_selected.master_to_slave_action)
-                {
-                    case "create":
-                        query = entity_selected.entity_definition_master;
-                        break;
-                    case "alter":
-                        query = (entity_selected.type == "procedure" ? entity_selected.entity_definition_master : entity_selected.entity_definition_master.replace("CREATE ","ALTER "));
-                        break;
-                    case "drop":
-                        query = "drop " + entity_selected.type + " " + entity_selected.nome + ";";
-                        break;
-                }
-
-                //TIPO ENTITA'
-                switch (entity_selected.type)
-                {
-                    case "table":
-                    case "view":
-                        query = query;
-                        break;
-                    case "procedure":
-                    case "function":
-                        query = "drop " + entity_selected.type + " " + entity_selected.nome + "; " + query.replace("NO SQL"," NOT DETERMINISTIC NO SQL SQL SECURITY DEFINER ");
-                        break;
-                }
-
-                $.get("FD_UpdateEntity.php?id_to=" + $('#slave').val() + "&query=" + encodeURIComponent(query),
-                    function(responce)
-                    {
-                        try {
-                            if(responce.indexOf("error")>-1) alert(JSON.parse(responce).error);
-                            else 
-                            {
-                                $('#sql_detail').modal('hide');
-                                get_data_compare();
-                            }
-                        }
-                        catch(err) {
-                            alert(err.message);
-                        }
+            callback: (result) => {
+                if (result) {
+                    if (entity_selected.entity_definition_master === null || entity_selected.entity_definition_master === '') { // cancellazione
+                        query = 'drop ' + entity_selected.type + " IF EXISTS " + entity_selected.nome;
+                        executeQuery(query);
+                    } else if (entity_selected.type === 'view' || entity_selected.type === 'procedure' || entity_selected.type === 'function') {
+                        executeQuery('drop ' + entity_selected.type + " IF EXISTS " + entity_selected.nome);
+                        setTimeout(() => executeQuery(entity_selected.entity_definition_master), 500);
+                    } else { // aggiornamento tabelle
+                        alterTable(entity_selected);
                     }
-                ).fail(function() {
-                    alert("Errore durante l'aggiornamento del DB !");
-                });
+                    console.log(query);
+                }
             }
+        });
+    }
+}
+
+function alterTable(entity_selected) {
+    const {entity_definition_master: master, entity_definition_slave: slave, nome } = entity_selected;
+    let masterRows = master.split('\n');
+    let slaveRows = slave.split('\n');
+    masterRows = masterRows.map(item => {
+        if (item.slice(-1) === ',') {
+            return item.substring(0, item.length - 1);
+        }
+        return item;
+    });
+    slaveRows = slaveRows.map(item => {
+        if (item.slice(-1) === ',') {
+            return item.substring(0, item.length - 1);
+        }
+        return item;
+    });
+    // copntrollo colonne mancanti
+    masterRows.map(mr => {
+       const columnName = mr.split(' ')[2];
+       if (slaveRows.filter(s => s.indexOf(columnName) > -1).length === 0 && slaveRows.filter(s => s === mr).length === 0) { // non esiste
+            console.log(`alter table ${nome} add ${mr}`);
+            executeQuery(`alter table ${nome} add ${mr}`);
+       } else if (slaveRows.filter(s => s.indexOf(columnName) > -1).length > 0 && slaveRows.filter(s => s === mr).length === 0) { // esiste
+           console.log(`alter table ${nome} modify ${mr}`);
+           executeQuery(`alter table ${nome} modify ${mr}`);
+       }
+    });
+    // controllo colonne in esubero
+    slaveRows.map(sr => {
+        const columnName = sr.split(' ')[2];
+        if (masterRows.filter(s => s.indexOf(columnName) > -1).length === 0 && masterRows.filter(m => m === sr).length === 0) {
+            console.log(`alter table ${nome} drop column ${columnName}`);
+            executeQuery(`alter table ${nome} drop column ${columnName}`);
         }
     });
-}
-
-function update_db_master()
-{
 
 }
 
-function get_data_compare()
-{
+function executeQuery(query) {
+    $.get("FD_UpdateEntity.php?id_to=" + $('#slave').val() + "&query=" + encodeURIComponent(query),
+        function(responce) {
+            try {
+                if (responce.indexOf("error")>-1) alert(JSON.parse(responce).error);
+                else
+                {
+                    $('#sql_detail').modal('hide');
+                    get_data_compare();
+                }
+            } catch(err) {
+                alert(err.message);
+            }
+        }
+    ).fail(function() {
+        alert("Errore durante l'aggiornamento del DB !");
+    });
+ }
 
+function get_data_compare() {
     $.get("FD_SqlCompare.php?id_master=" + $('#master').val() + "&id_slave=" + $('#slave').val(),
         function(responce)
         {
@@ -145,7 +173,11 @@ function get_data_compare()
                         "  <td align='center'><input type=\"checkbox\" "+(responce[i]["is_different"] == true ? 'checked' : '' )+" disabled='true'></td>\n" +
                         "  <td align='center'> \n" +
                                 "<button type=\"button\" class=\"waves-effect\" data-toggle=\"modal\" data-target=\"#sql_detail\" class=\"btn btn-secondary\" onclick=\"sql_details('"+responce[i]["entity_master"]+"','"+responce[i]["entity_slave"]+"','"+responce[i]["type"]+"')\" >\n" +
-                                "<i class=\"glyphicon glyphicon-search\" aria-hidden=\"true\"></i></button></td>\n" +
+                                "<i class=\"glyphicon glyphicon-search\" aria-hidden=\"true\"></i></button>\n" +
+                                "<button type=\"button\" class=\"waves-effect\" data-toggle=\"modal\" data-target=\"#sql_update\" class=\"btn btn-secondary\" onclick=\"sql_update('"+responce[i]["entity_master"]+"','"+responce[i]["entity_slave"]+"','"+responce[i]["type"]+"')\" >\n" +
+                                "<i class=\"glyphicon glyphicon-play\" aria-hidden=\"true\"></i></button>\n" +
+                                "<button type=\"button\" class=\"waves-effect\" data-toggle=\"modal\" data-target=\"#get_data_compare\" class=\"btn btn-secondary\" onclick=\"get_data_compare()\" >\n" +
+                                "<i class=\"glyphicon glyphicon-refresh\" aria-hidden=\"true\"></i></button></td>\n" +
                         " </tr>";
             }
 
