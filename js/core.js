@@ -129,7 +129,7 @@ function alterTable(entity_selected) {
 }
 
 function executeQuery(query) {
-    $.get("FD_UpdateEntity.php?id_to=" + $('#slave').val() + "&query=" + encodeURIComponent(query),
+    $.get("FD_UpdateEntity.php?id_to=" + $('#slave').val() + "&query=" + encodeURIComponent(query) + "&token=AGGIORNA_CAZZO",
         function(responce) {
             try {
                 if (responce.indexOf("error")>-1) alert(JSON.parse(responce).error);

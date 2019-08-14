@@ -36,6 +36,13 @@ require("WebTools/FD_Logger.php");
 $log = new FD_Logger(null);
 $id_to = $_GET["id_to"];
 $query = $_GET["query"];
+$token = $_GET["token"];
+
+if(strlen($token) == 0 || $token != 'AGGIORNA_CAZZO') {
+    $log->lwrite('[ERRORE] - Token non valido !');
+    echo '{"error": "Token non valido !"}';
+    return;
+}
 
 if(strlen($id_to) == 0 || strlen($query) == 0)
 {
