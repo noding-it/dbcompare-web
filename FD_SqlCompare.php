@@ -25,7 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS')
 }
 
 //remove the notice
-error_reporting(E_ERROR | E_WARNING | E_PARSE);
+// error_reporting(E_ERROR | E_WARNING | E_PARSE);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 //require("Config/FD_Define.php");
 require("DB/FD_DB.php");
@@ -37,7 +39,6 @@ $log = new FD_Logger(null);
 
 $id_master = $_GET["id_master"];
 $id_slave = $_GET["id_slave"];
-
 
 $master_db = json_decode(file_get_contents("Config/config.json"),true)[array_search($id_master,array_column(json_decode(file_get_contents("Config/config.json"),true),"id"))]["db"];
 $slave_db = json_decode(file_get_contents("Config/config.json"),true)[array_search($id_slave,array_column(json_decode(file_get_contents("Config/config.json"),true),"id"))]["db"];
@@ -56,11 +57,11 @@ function remove_auto_increment_definer($string)
     if(strpos($string,"AUTO_INCREMENT") !== false)
     {
         $path_to_replace = substr(strstr( $string, 'AUTO_INCREMENT=' ),0,stripos(strstr( $string, 'AUTO_INCREMENT=' )," "));
-        return str_replace("  "," ",str_replace("DEFINER=``@`%`","",str_replace($path_to_replace,"",$string)));
+        return str_replace("  "," ",str_replace("DEFINER=`root`@`%`","",str_replace("DEFINER=`pmauser`@`localhost`","",str_replace("DEFINER=``@`%`","",str_replace($path_to_replace,"",$string)))));
     }
     else
     {
-        return str_replace("DEFINER=``@`%`","",$string);
+        return str_replace("DEFINER=`root`@`%`","",str_replace("DEFINER=`pmauser`@`localhost`","",str_replace("DEFINER=``@`%`","",$string)));
     }
 }
 
@@ -142,7 +143,7 @@ try
       );
     }
 
-    $query = "SHOW PROCEDURE STATUS;";
+    $query = "SHOW PROCEDURE STATUS WHERE db = '$master_db';";
     $log->lwrite('[INFO] - [MASTER] - query - '.$query);
     $master_result = $sql->exportJSON($query);
 
@@ -158,7 +159,7 @@ try
 
     $master_result_array = json_decode($master_result,true);
 
-    $query = "SHOW FUNCTION STATUS;";
+    $query = "SHOW FUNCTION STATUS WHERE db = '$master_db';";
     $log->lwrite('[INFO] - [MASTER] - query - '.$query);
     $master_result = $sql->exportJSON($query);
 
@@ -281,7 +282,7 @@ try
 
     }
 
-    $query = "SHOW PROCEDURE STATUS;";
+    $query = "SHOW PROCEDURE STATUS WHERE db = '$slave_db';";
     $log->lwrite('[INFO] - [SLAVE] - query - '.$query);
     $slave_result = $sql->exportJSON($query);
 
@@ -297,7 +298,7 @@ try
 
     $slave_result_array = json_decode($slave_result,true);
 
-    $query = "SHOW FUNCTION STATUS;";
+    $query = "SHOW FUNCTION STATUS WHERE db = '$slave_db';";
     $log->lwrite('[INFO] - [SLAVE] - query - '.$query);
     $slave_result = $sql->exportJSON($query);
 
